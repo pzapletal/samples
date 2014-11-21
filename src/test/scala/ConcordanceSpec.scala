@@ -5,7 +5,6 @@ import org.scalatest._
  */
 class ConcordanceSpec extends FlatSpec with Matchers {
 
-  //make this work ! -> then handle null pres getOrelse a option param
   "Concordance calculation" should "return empty collection when input is empty" in {
     Concordance.calculateConcordance("") should be(Seq())
   }
@@ -14,7 +13,7 @@ class ConcordanceSpec extends FlatSpec with Matchers {
     Concordance.calculateConcordance(null) should be(Seq())
   }
 
-  it should "return empty collection when input is '....." in {
+  it should "return empty collection when input is '.....'" in {
     Concordance.calculateConcordance(".....") should be(Seq())
   }
 

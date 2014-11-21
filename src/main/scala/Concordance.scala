@@ -81,6 +81,6 @@ object Concordance {
 /**
  * Contains result for one word
  * @param word Processed word
- * @param occurrences Occurences in sentences
+ * @param occurrences Occurrences in sentences
  */
 case class ConcordanceResult(word: String, occurrences: List[Int]);
