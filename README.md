@@ -30,6 +30,7 @@ I consider this task as very easy, complete solution was ready during 4 hours.
 
 ## Usage
 
+```
 $ sbt run
 ...
 1. a			{2:1,1}
@@ -42,7 +43,8 @@ $ sbt run
 8. concordance			{1:1}
 9. document			{1:1}
 ...
-
+```
+```
 $ sbt test
 ...
 ConcordanceSpec:
@@ -50,3 +52,4 @@ Concordance calculation
  - should return empty collection when input is empty
  - should return empty collection when input is null
 ...
+```
