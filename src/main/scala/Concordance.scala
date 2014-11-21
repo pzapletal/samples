@@ -1,29 +1,51 @@
 import scala.collection.mutable
 import scalaz.Scalaz._
 
+/**
+ * Solution of Concordance task
+ */
 object Concordance {
 
-  //http://stackoverflow.com/questions/25735644/python-regex-for-splitting-text-into-sentences-sentence-tokenizing
-  val SENTENCE_SEP = "(?<!\\w\\.\\w.)(?<![A-Z][a-z]\\.)(?<=\\.|\\?)\\s"
+  /**
+   * Regex for splitting article to sentences
+   * http://stackoverflow.com/questions/25735644/python-regex-for-splitting-text-into-sentences-sentence-tokenizing
+   */
+  val SENTENCE_PATTERN = "(?<!\\w\\.\\w.)(?<![A-Z][a-z]\\.)(?<=\\.|\\?)\\s"
 
-  //https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html
-  val WORD_SEP = "(\\s|\\p{Punct})+" //TODO FIX i.e.
+  /**
+   * Regex for splitting sentence to words
+   * https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html
+   */
+  val WORD_PATTERN = "(\\s|\\p{Punct})+"
 
+  /**
+   * Test article from task description. Used as input for main method
+   */
   val ARTICLE = "Given an arbitrary text document written in English, write a program that will generate a " +
     "concordance, i.e. an alphabetical list of all word occurrences, labeled with word frequencies." +
     " Bonus: label each word with the sentence numbers in which each occurrence appeared."
 
+  /**
+   * Entry point of algorithm. Calculates the concordance for 'ARTICLE'
+   * @param args
+   */
   def main(args: Array[String]): Unit = {
     val result = calculateConcordance(ARTICLE)
     prettyPrint(result)
   }
 
-  def calculateConcordance(text: String): Seq[(String, List[Int])] = {
+  /**
+   * Calculates Concordance for given 'text'
+   * @param text 'text' for processing
+   * @return Seq of 'ConcordanceResult' with calculated concordances
+   */
+  def calculateConcordance(text: String): Seq[ConcordanceResult] = {
 
-    val sentences = text.toLowerCase.split(SENTENCE_SEP)
+    val sentences = Option(text).getOrElse("").toLowerCase.split(SENTENCE_PATTERN)
 
     val wordsOccursPerSentence = sentences
-      .map(s => s.split(WORD_SEP))
+      .filter(_.length > 0)
+      .map(s => s.split(WORD_PATTERN))
       .zipWithIndex
       .map(s => s._1.foldLeft(mutable.Map[String, List[Int]]()) {
       (m, w) =>
@@ -35,17 +57,30 @@ object Concordance {
     }.toMap
       ).toList
 
-    val result = wordsOccursPerSentence
-      .reduce(_ |+| _)
-      .toSeq
-      .sortBy(_._1)
+    val merged = wordsOccursPerSentence.reduceOption(_ |+| _)
+
+    val result = merged match {
+      case Some(r) => r.toSeq.sortBy(_._1).map(r => ConcordanceResult(r._1, r._2))
+      case None => Seq()
+    }
 
     result
   }
 
-  def prettyPrint(result: Seq[(String, List[Int])]): Unit =
+  /**
+   * Prints given Seq of 'ConcordanceResult' in requested format
+   * @param result
+   */
+  def prettyPrint(result: Seq[ConcordanceResult]): Unit =
     result.zipWithIndex.foreach(r =>
-      println(s"${r._2 + 1}. ${r._1._1}\t\t\t{${r._1._2.length}:${printFreqs(r._1._2)}}"))
+      println(s"${r._2 + 1}. ${r._1.word}\t\t\t{${r._1.occurrences.length}:${printFreqs(r._1.occurrences)}}"))
 
   private def printFreqs(freqs: List[Int]): String = freqs.map(_.toString + ",").reduce(_ + _).dropRight(1)
 }
+
+/**
+ * Contains result for one word
+ * @param word Processed word
+ * @param occurrences Occurences in sentences
+ */
+case class ConcordanceResult(word: String, occurrences: List[Int]);
